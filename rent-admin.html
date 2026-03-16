@@ -3,395 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin – Loss of Rent</title>
+  <title>Beagle Admin – Loss of Rent</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #fdf3e7;
-      min-height: 100vh;
-      padding: 0;
-    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #fdf3e7; min-height: 100vh; }
 
-    /* ── LOGIN SCREEN ── */
-    #loginScreen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
+    /* ── LOGIN ── */
+    #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
 
-    .login-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 32px rgba(120,53,15,0.13);
-      max-width: 380px;
-      width: 100%;
-      overflow: hidden;
-    }
+    .login-card { background: white; border-radius: 16px; box-shadow: 0 4px 32px rgba(120,53,15,0.13); max-width: 380px; width: 100%; overflow: hidden; }
 
-    .login-card .header {
-      background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%);
-      color: white;
-      padding: 28px 28px 22px;
-      text-align: center;
-    }
-
-    .login-card .header .lock { font-size: 2rem; margin-bottom: 10px; }
-    .login-card .header h2   { font-size: 1.25rem; font-weight: 700; margin-bottom: 4px; }
-    .login-card .header p    { font-size: 0.85rem; opacity: 0.8; }
-
+    .login-card .header { background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%); color: white; padding: 28px 28px 22px; text-align: center; }
+    .login-card .header .brand-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+    .login-card .header .brand-logo { width: 32px; height: 32px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.35); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .login-card .header .brand-name { font-size: 1rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+    .login-card .header .lock { font-size: 1.8rem; margin-bottom: 8px; }
+    .login-card .header h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
+    .login-card .header p  { font-size: 0.83rem; opacity: 0.8; }
     .login-card .body { padding: 28px; }
 
-    .login-card label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #78350f;
-      margin-bottom: 8px;
-    }
+    .login-card label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #78350f; margin-bottom: 8px; }
+    .login-card input[type="password"] { width: 100%; padding: 11px 14px; border: 2px solid #fde8d0; border-radius: 10px; font-size: 0.95rem; font-family: inherit; background: #fffbf7; color: #1c1917; margin-bottom: 14px; transition: border-color 0.18s; }
+    .login-card input[type="password"]:focus { outline: none; border-color: #ea580c; }
 
-    .login-card input[type="password"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 2px solid #fde8d0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      background: #fffbf7;
-      color: #1c1917;
-      margin-bottom: 14px;
-      transition: border-color 0.18s;
-    }
-
-    .login-card input[type="password"]:focus {
-      outline: none;
-      border-color: #ea580c;
-      background: #fff;
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #7c2d12, #ea580c);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: opacity 0.18s;
-    }
-
+    .btn-primary { width: 100%; padding: 12px; background: linear-gradient(135deg, #7c2d12, #ea580c); color: white; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.18s; }
     .btn-primary:hover { opacity: 0.88; }
 
-    .login-error {
-      color: #dc2626;
-      font-size: 0.83rem;
-      margin-top: 10px;
-      text-align: center;
-      display: none;
-    }
+    .login-error { color: #dc2626; font-size: 0.83rem; margin-top: 10px; text-align: center; display: none; }
 
-    /* ── ADMIN APP ── */
+    /* ── APP ── */
     #adminApp { display: none; }
 
-    .topbar {
-      background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%);
-      color: white;
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .topbar { background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%); color: white; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar .brand-logo { width: 32px; height: 32px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .topbar .brand-name { font-size: 1rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .topbar .sub { font-size: 0.75rem; opacity: 0.8; margin-top: 1px; }
 
-    .topbar h1 { font-size: 1.15rem; font-weight: 700; }
-    .topbar .sub { font-size: 0.8rem; opacity: 0.8; margin-top: 2px; }
-
-    .topbar-right { display: flex; align-items: center; gap: 16px; }
-
-    .btn-logout {
-      background: rgba(255,255,255,0.18);
-      border: 1px solid rgba(255,255,255,0.35);
-      color: white;
-      padding: 7px 16px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.18s;
-    }
-
+    .btn-logout { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); color: white; padding: 7px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.18s; }
     .btn-logout:hover { background: rgba(255,255,255,0.28); }
 
-    /* Tabs */
-    .tabs {
-      background: #fff;
-      border-bottom: 2px solid #fde8d0;
-      display: flex;
-      padding: 0 32px;
-    }
-
-    .tab {
-      padding: 14px 20px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #b45309;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.18s;
-      user-select: none;
-    }
-
+    .tabs { background: #fff; border-bottom: 2px solid #fde8d0; display: flex; padding: 0 28px; }
+    .tab { padding: 13px 18px; font-size: 0.88rem; font-weight: 600; color: #b45309; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.18s; user-select: none; }
     .tab:hover { color: #7c2d12; }
     .tab.active { color: #ea580c; border-bottom-color: #ea580c; }
 
-    /* Content area */
-    .content { padding: 28px 32px; max-width: 1100px; }
-
+    .content { padding: 26px 28px; max-width: 1100px; }
     .panel { display: none; }
     .panel.active { display: block; }
 
-    /* ── ENROLLMENTS PANEL ── */
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
+    /* ── ENROLLMENTS ── */
+    .panel-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
     .panel-header h2 { font-size: 1.1rem; font-weight: 700; color: #7c2d12; }
     .panel-header p  { font-size: 0.82rem; color: #b45309; margin-top: 2px; }
 
-    .btn-secondary {
-      padding: 9px 18px;
-      background: #fff7ed;
-      border: 2px solid #fdba74;
-      color: #c2410c;
-      border-radius: 9px;
-      font-size: 0.83rem;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
+    .btn-secondary { padding: 9px 16px; background: #fff7ed; border: 2px solid #fdba74; color: #c2410c; border-radius: 9px; font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.15s; }
     .btn-secondary:hover { background: #fde8d0; }
+    .btn-secondary.danger { color: #dc2626; border-color: #fca5a5; background: #fff1f1; }
+    .btn-secondary.danger:hover { background: #fee2e2; }
 
-    .btn-danger {
-      padding: 5px 12px;
-      background: #fff1f1;
-      border: 1px solid #fca5a5;
-      color: #dc2626;
-      border-radius: 7px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
+    .btn-row-danger { padding: 5px 10px; background: #fff1f1; border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; font-size: 0.73rem; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .btn-row-danger:hover { background: #fee2e2; }
 
-    .btn-danger:hover { background: #fee2e2; }
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1.5px solid #fde8d0; background: white; }
 
-    /* Table */
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 12px;
-      border: 1.5px solid #fde8d0;
-      background: white;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    thead th {
-      background: #fff7ed;
-      color: #78350f;
-      font-weight: 700;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 12px 14px;
-      text-align: left;
-      border-bottom: 1.5px solid #fde8d0;
-      white-space: nowrap;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    thead th { background: #fff7ed; color: #78350f; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 11px 13px; text-align: left; border-bottom: 1.5px solid #fde8d0; white-space: nowrap; }
     tbody tr { border-bottom: 1px solid #fef3e2; transition: background 0.12s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: #fffbf7; }
+    tbody td { padding: 10px 13px; color: #1c1917; vertical-align: middle; }
 
-    tbody td {
-      padding: 11px 14px;
-      color: #1c1917;
-      vertical-align: middle;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 20px;
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
     .badge-3 { background: #fef9c3; color: #854d0e; }
     .badge-4 { background: #ffedd5; color: #c2410c; }
     .badge-5 { background: #fee2e2; color: #991b1b; }
 
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      color: #c4a882;
-    }
-
+    .empty-state { text-align: center; padding: 48px 24px; color: #c4a882; }
     .empty-state span { font-size: 2.5rem; display: block; margin-bottom: 10px; }
-    .empty-state p    { font-size: 0.9rem; }
+    .empty-state p { font-size: 0.9rem; }
 
-    /* ── PM COMPANIES PANEL ── */
+    .loading-row { text-align: center; padding: 32px; color: #b45309; font-size: 0.88rem; }
+
+    /* ── PM COMPANIES ── */
     .pm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-
     @media (max-width: 640px) { .pm-grid { grid-template-columns: 1fr; } }
 
-    .pm-box {
-      background: white;
-      border: 1.5px solid #fde8d0;
-      border-radius: 12px;
-      padding: 22px;
-    }
+    .pm-box { background: white; border: 1.5px solid #fde8d0; border-radius: 12px; padding: 22px; }
+    .pm-box h3 { font-size: 0.85rem; font-weight: 700; color: #7c2d12; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #fde8d0; }
 
-    .pm-box h3 {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #7c2d12;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #fde8d0;
-    }
-
-    .pm-list { list-style: none; margin-bottom: 18px; }
-
-    .pm-list li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 9px 12px;
-      background: #fffbf7;
-      border: 1.5px solid #fde8d0;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 0.88rem;
-      color: #1c1917;
-    }
-
+    .pm-list { list-style: none; margin-bottom: 16px; max-height: 320px; overflow-y: auto; }
+    .pm-list li { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #fffbf7; border: 1.5px solid #fde8d0; border-radius: 8px; margin-bottom: 7px; font-size: 0.88rem; color: #1c1917; }
     .pm-list li span { flex: 1; }
 
     .add-pm-row { display: flex; gap: 8px; }
-
-    .add-pm-row input {
-      flex: 1;
-      padding: 10px 12px;
-      border: 2px solid #fde8d0;
-      border-radius: 9px;
-      font-size: 0.88rem;
-      font-family: inherit;
-      color: #1c1917;
-      background: #fffbf7;
-    }
-
+    .add-pm-row input { flex: 1; padding: 10px 12px; border: 2px solid #fde8d0; border-radius: 9px; font-size: 0.88rem; font-family: inherit; color: #1c1917; background: #fffbf7; }
     .add-pm-row input:focus { outline: none; border-color: #ea580c; }
     .add-pm-row input::placeholder { color: #c4a882; }
 
-    .btn-add {
-      padding: 10px 16px;
-      background: #ea580c;
-      color: white;
-      border: none;
-      border-radius: 9px;
-      font-weight: 700;
-      font-size: 0.88rem;
-      cursor: pointer;
-      font-family: inherit;
-      transition: opacity 0.15s;
-    }
-
+    .btn-add { padding: 10px 16px; background: #ea580c; color: white; border: none; border-radius: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
     .btn-add:hover { opacity: 0.88; }
 
-    .save-bar {
-      margin-top: 16px;
-      text-align: right;
-    }
+    .save-confirm { font-size: 0.8rem; color: #16a34a; margin-top: 8px; display: none; }
+    .save-error   { font-size: 0.8rem; color: #dc2626; margin-top: 8px; display: none; }
 
-    .save-confirm {
-      font-size: 0.8rem;
-      color: #16a34a;
-      margin-top: 8px;
-      display: none;
-    }
-
-    /* Password change box */
-    .settings-box {
-      background: white;
-      border: 1.5px solid #fde8d0;
-      border-radius: 12px;
-      padding: 22px;
-      margin-top: 24px;
-    }
-
-    .settings-box h3 {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #7c2d12;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #fde8d0;
-    }
-
-    .settings-box input[type="password"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 2px solid #fde8d0;
-      border-radius: 9px;
-      font-size: 0.88rem;
-      font-family: inherit;
-      color: #1c1917;
-      background: #fffbf7;
-      margin-bottom: 10px;
-    }
-
+    /* ── SETTINGS ── */
+    .settings-box { background: white; border: 1.5px solid #fde8d0; border-radius: 12px; padding: 22px; }
+    .settings-box h3 { font-size: 0.85rem; font-weight: 700; color: #7c2d12; margin-bottom: 6px; padding-bottom: 8px; border-bottom: 2px solid #fde8d0; }
+    .settings-box .hint { font-size: 0.75rem; color: #b45309; margin-bottom: 12px; margin-top: 8px; }
+    .settings-box input[type="password"] { width: 100%; padding: 10px 12px; border: 2px solid #fde8d0; border-radius: 9px; font-size: 0.88rem; font-family: inherit; color: #1c1917; background: #fffbf7; margin-bottom: 10px; }
     .settings-box input[type="password"]:focus { outline: none; border-color: #ea580c; }
-
-    .hint {
-      font-size: 0.75rem;
-      color: #b45309;
-      margin-bottom: 10px;
-    }
   </style>
 </head>
 <body>
 
-<!-- ══════════ LOGIN SCREEN ══════════ -->
+<!-- ══════════ LOGIN ══════════ -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="header">
+      <div class="brand-row">
+        <div class="brand-logo">🐶</div>
+        <span class="brand-name">Beagle</span>
+      </div>
       <div class="lock">🔒</div>
-      <h2>Admin Access</h2>
-      <p>Loss of Rent Management Portal</p>
+      <h2>Admin Portal</h2>
+      <p>Loss of Rent Management</p>
     </div>
     <div class="body">
-      <label for="passwordInput">Password</label>
+      <label>Password</label>
       <input type="password" id="passwordInput" placeholder="Enter your password"
              onkeydown="if(event.key==='Enter') login()" />
       <button class="btn-primary" onclick="login()">Sign In →</button>
@@ -402,15 +145,15 @@
 
 <!-- ══════════ ADMIN APP ══════════ -->
 <div id="adminApp">
-
   <div class="topbar">
-    <div>
-      <h1>Loss of Rent — Admin Portal</h1>
-      <div class="sub">Manage enrollments and property companies</div>
+    <div class="topbar-left">
+      <div class="brand-logo">🐶</div>
+      <div>
+        <div class="brand-name">Beagle Admin</div>
+        <div class="sub">Loss of Rent Portal</div>
+      </div>
     </div>
-    <div class="topbar-right">
-      <button class="btn-logout" onclick="logout()">Sign Out</button>
-    </div>
+    <button class="btn-logout" onclick="logout()">Sign Out</button>
   </div>
 
   <div class="tabs">
@@ -420,58 +163,53 @@
 
   <div class="content">
 
-    <!-- ── ENROLLMENTS PANEL ── -->
+    <!-- ENROLLMENTS -->
     <div id="panel-enrollments" class="panel active">
       <div class="panel-header">
         <div>
           <h2>Enrollment Submissions</h2>
           <p id="enrollCount">Loading…</p>
         </div>
-        <div style="display:flex;gap:10px;">
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="loadEnrollments()">↻ Refresh</button>
           <button class="btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
-          <button class="btn-secondary" onclick="clearEnrollments()" style="color:#dc2626;border-color:#fca5a5;">🗑 Clear All</button>
+          <button class="btn-secondary danger" onclick="clearEnrollments()">🗑 Clear All</button>
         </div>
       </div>
-
       <div class="table-wrap" id="enrollmentsWrap">
-        <!-- filled by JS -->
+        <div class="loading-row">Loading enrollments…</div>
       </div>
     </div>
 
-    <!-- ── COMPANIES PANEL ── -->
+    <!-- PM COMPANIES -->
     <div id="panel-companies" class="panel">
       <div class="panel-header">
         <div>
           <h2>Property Management Companies</h2>
-          <p>Changes here update the dropdown in the quote tool instantly.</p>
+          <p>Changes update the quote tool dropdown for everyone instantly.</p>
         </div>
       </div>
-
       <div class="pm-grid">
         <div class="pm-box">
           <h3>Current Companies</h3>
-          <ul class="pm-list" id="pmList"><!-- filled by JS --></ul>
+          <ul class="pm-list" id="pmList"><li style="color:#c4a882;justify-content:center;">Loading…</li></ul>
           <div class="add-pm-row">
             <input type="text" id="newCompanyInput" placeholder="Add new company…"
                    onkeydown="if(event.key==='Enter') addCompany()" />
             <button class="btn-add" onclick="addCompany()">+ Add</button>
           </div>
-          <div class="save-bar">
-            <button class="btn-primary" style="width:auto;padding:10px 24px;" onclick="saveCompanies()">Save Changes</button>
-            <div class="save-confirm" id="saveConfirm">✅ Saved! The quote tool will now show these companies.</div>
-          </div>
+          <div class="save-confirm" id="pmSaveOk">✅ Saved!</div>
+          <div class="save-error"   id="pmSaveErr">⚠ Error saving. Please try again.</div>
         </div>
 
-        <div>
-          <div class="settings-box">
-            <h3>🔑 Change Admin Password</h3>
-            <p class="hint">Enter a new password below and save. You'll need it next time you log in.</p>
-            <input type="password" id="newPwdInput"     placeholder="New password" />
-            <input type="password" id="confirmPwdInput" placeholder="Confirm new password" />
-            <button class="btn-primary" style="width:auto;padding:10px 24px;" onclick="changePassword()">Update Password</button>
-            <div class="save-confirm" id="pwdConfirm">✅ Password updated!</div>
-            <div class="save-confirm" id="pwdError" style="color:#dc2626;">⚠ Passwords don't match.</div>
-          </div>
+        <div class="settings-box">
+          <h3>🔑 Change Admin Password</h3>
+          <p class="hint">Enter a new password and save. You'll need it next time you log in.</p>
+          <input type="password" id="newPwdInput"     placeholder="New password" />
+          <input type="password" id="confirmPwdInput" placeholder="Confirm new password" />
+          <button class="btn-primary" style="width:auto;padding:10px 24px;" onclick="changePassword()">Update Password</button>
+          <div class="save-confirm" id="pwdOk">✅ Password updated!</div>
+          <div class="save-error"   id="pwdErr">⚠ Passwords don't match.</div>
         </div>
       </div>
     </div>
@@ -480,25 +218,21 @@
 </div>
 
 <script>
-  // ─── Default password (change this after first login!) ────────────
-  const DEFAULT_PASSWORD = 'BeaglePM2026';
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🔧 PASTE YOUR SUPABASE CREDENTIALS HERE
+  const SUPABASE_URL      = 'https://rucodbompawcsfeqdlog.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1Y29kYm9tcGF3Y3NmZXFkbG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Nzk4NTMsImV4cCI6MjA4OTI1NTg1M30.pb0oaGqYFpzs2KGbnIYaWqOsIyU2z8iUWnNdWExDxDc';
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  // ─── Default PM companies ──────────────────────────────────────────
-  const DEFAULT_COMPANIES = [
-    "Acme Property Management",
-    "Sunrise Realty Group",
-    "Peak Property Solutions",
-    "BlueSky Lettings",
-    "Cornerstone Property Co."
-  ];
+  const DEFAULT_PASSWORD  = 'BeaglePM2026';
 
-  let pmCompanies  = [];
-  let enrollments  = [];
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ─── Login ─────────────────────────────────────────────────────────
-  function getPassword() {
-    return localStorage.getItem('lor_adminPwd') || DEFAULT_PASSWORD;
-  }
+  let enrollments = [];
+  let pmCompanies = [];
+
+  // ── Auth ────────────────────────────────────────────────
+  function getPassword() { return localStorage.getItem('lor_adminPwd') || DEFAULT_PASSWORD; }
 
   function login() {
     const val = document.getElementById('passwordInput').value;
@@ -506,7 +240,8 @@
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminApp').style.display    = 'block';
       document.getElementById('loginError').style.display  = 'none';
-      loadData();
+      loadEnrollments();
+      loadPMCompanies();
     } else {
       document.getElementById('loginError').style.display = 'block';
       document.getElementById('passwordInput').value = '';
@@ -520,7 +255,7 @@
     document.getElementById('passwordInput').value = '';
   }
 
-  // ─── Tabs ──────────────────────────────────────────────────────────
+  // ── Tabs ────────────────────────────────────────────────
   function switchTab(name, el) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -528,164 +263,170 @@
     document.getElementById('panel-' + name).classList.add('active');
   }
 
-  // ─── Load data ─────────────────────────────────────────────────────
-  function loadData() {
-    const storedE = localStorage.getItem('lor_enrollments');
-    enrollments   = storedE ? JSON.parse(storedE) : [];
+  // ── Enrollments ─────────────────────────────────────────
+  async function loadEnrollments() {
+    document.getElementById('enrollmentsWrap').innerHTML = '<div class="loading-row">Loading…</div>';
+    document.getElementById('enrollCount').textContent = 'Loading…';
 
-    const storedP = localStorage.getItem('lor_pmCompanies');
-    pmCompanies   = storedP ? JSON.parse(storedP) : [...DEFAULT_COMPANIES];
+    const { data, error } = await sb
+      .from('enrollments')
+      .select('*')
+      .order('created_at', { ascending: false });
 
+    if (error) {
+      document.getElementById('enrollmentsWrap').innerHTML =
+        `<div class="empty-state"><span>⚠️</span><p>Could not load enrollments.<br><small>${error.message}</small></p></div>`;
+      document.getElementById('enrollCount').textContent = 'Error loading';
+      return;
+    }
+
+    enrollments = data || [];
     renderEnrollments();
-    renderPMList();
   }
 
-  // ─── Enrollments ───────────────────────────────────────────────────
   function renderEnrollments() {
-    const wrap = document.getElementById('enrollmentsWrap');
+    const wrap  = document.getElementById('enrollmentsWrap');
     const count = document.getElementById('enrollCount');
-
     count.textContent = enrollments.length === 0
       ? 'No submissions yet'
       : `${enrollments.length} submission${enrollments.length !== 1 ? 's' : ''}`;
 
     if (enrollments.length === 0) {
-      wrap.innerHTML = `
-        <div class="empty-state">
-          <span>📭</span>
-          <p>No enrollments submitted yet.<br>They'll appear here once owners use the quote tool.</p>
-        </div>`;
+      wrap.innerHTML = `<div class="empty-state"><span>📭</span><p>No enrollments yet.<br>They'll appear here once owners use the quote tool.</p></div>`;
       return;
     }
 
-    const rows = enrollments.slice().reverse().map((e, i) => {
-      const idx = enrollments.length - 1 - i;
-      const badgeClass = `badge-${e.months}`;
+    const rows = enrollments.map(e => {
+      const date    = e.created_at ? new Date(e.created_at).toLocaleString('en-US', { dateStyle:'medium', timeStyle:'short' }) : '—';
+      const addrParts = [e.address_line1, e.address_line2, e.city && e.state ? `${e.city}, ${e.state}` : (e.city || e.state), e.zip].filter(Boolean);
+      const addr    = addrParts.join(', ') || '—';
       return `
         <tr>
-          <td style="color:#9a7c5c;font-size:0.78rem;white-space:nowrap">${e.submittedAt || '—'}</td>
+          <td style="color:#9a7c5c;font-size:0.78rem;white-space:nowrap">${date}</td>
           <td><strong>${e.name || '—'}</strong></td>
-          <td>${e.address || '—'}</td>
-          <td>${e.pm || '—'}</td>
-          <td><span class="badge ${badgeClass}">${e.months}-Month</span></td>
-          <td style="white-space:nowrap">${e.bandLabel || e.band || '—'}</td>
-          <td><strong>$${e.monthly}/mo</strong></td>
-          <td><strong>$${e.annual}/yr</strong></td>
-          <td><button class="btn-danger" onclick="deleteEnrollment(${idx})">Remove</button></td>
+          <td style="font-size:0.78rem;color:#6b7280">${e.phone || '—'}</td>
+          <td style="font-size:0.78rem;color:#6b7280">${e.email || '—'}</td>
+          <td style="font-size:0.8rem">${addr}</td>
+          <td>${e.pm_company || '—'}</td>
+          <td><span class="badge badge-${e.months}">${e.months}-Month</span></td>
+          <td style="white-space:nowrap;font-size:0.8rem">${e.band_label || e.band || '—'}</td>
+          <td style="white-space:nowrap;font-size:0.8rem">${e.start_date || '—'}</td>
+          <td><strong>$${e.monthly_cost}/mo</strong></td>
+          <td><strong>$${e.annual_cost}/yr</strong></td>
+          <td><button class="btn-row-danger" onclick="deleteEnrollment('${e.id}')">Remove</button></td>
         </tr>`;
     }).join('');
 
     wrap.innerHTML = `
       <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Owner Name</th>
-            <th>Property Address</th>
-            <th>PM Company</th>
-            <th>Plan</th>
-            <th>Rent Band</th>
-            <th>Monthly</th>
-            <th>Annual</th>
-            <th></th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>Enrolled</th><th>Owner Name</th><th>Phone</th><th>Email</th>
+          <th>Property Address</th><th>PM Company</th><th>Plan</th>
+          <th>Rent Band</th><th>Start Date</th><th>Monthly</th><th>Annual</th><th></th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
   }
 
-  function deleteEnrollment(idx) {
+  async function deleteEnrollment(id) {
     if (!confirm('Remove this enrollment?')) return;
-    enrollments.splice(idx, 1);
-    localStorage.setItem('lor_enrollments', JSON.stringify(enrollments));
-    renderEnrollments();
+    const { error } = await sb.from('enrollments').delete().eq('id', id);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    await loadEnrollments();
   }
 
-  function clearEnrollments() {
+  async function clearEnrollments() {
     if (!confirm('Clear ALL enrollment records? This cannot be undone.')) return;
-    enrollments = [];
-    localStorage.setItem('lor_enrollments', JSON.stringify(enrollments));
-    renderEnrollments();
+    const { error } = await sb.from('enrollments').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    if (error) { alert('Error: ' + error.message); return; }
+    await loadEnrollments();
   }
 
   function exportCSV() {
     if (enrollments.length === 0) { alert('No enrollments to export.'); return; }
-    const header = ['Date','Owner Name','Property Address','PM Company','Plan (Months)','Rent Band','Monthly Cost','Annual Cost'];
-    const rows   = enrollments.map(e => [
-      `"${e.submittedAt || ''}"`,
-      `"${e.name || ''}"`,
-      `"${e.address || ''}"`,
-      `"${e.pm || ''}"`,
-      e.months,
-      `"${e.bandLabel || e.band || ''}"`,
-      e.monthly,
-      e.annual
-    ].join(','));
+    const header = ['Date Enrolled','Owner Name','Phone','Email','Address Line 1','Address Line 2','City','State','Zip','PM Company','Plan (Months)','Rent Band','Start Date','Monthly Cost','Annual Cost'];
+    const rows   = enrollments.map(e => {
+      const date = e.created_at ? new Date(e.created_at).toLocaleString('en-US') : '';
+      return [
+        `"${date}"`,`"${e.name||''}"`,`"${e.phone||''}"`,`"${e.email||''}"`,
+        `"${e.address_line1||''}"`,`"${e.address_line2||''}"`,`"${e.city||''}"`,
+        `"${e.state||''}"`,`"${e.zip||''}"`,`"${e.pm_company||''}"`,
+        e.months,`"${e.band_label||e.band||''}"`,`"${e.start_date||''}"`,
+        e.monthly_cost,e.annual_cost
+      ].join(',');
+    });
     const csv  = [header.join(','), ...rows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `lor-enrollments-${new Date().toISOString().slice(0,10)}.csv`;
+    const a    = Object.assign(document.createElement('a'), { href: url, download: `beagle-enrollments-${new Date().toISOString().slice(0,10)}.csv` });
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  // ─── PM Companies ──────────────────────────────────────────────────
+  // ── PM Companies ────────────────────────────────────────
+  async function loadPMCompanies() {
+    const { data, error } = await sb.from('pm_companies').select('id, name').order('name');
+    pmCompanies = (!error && data) ? data : [];
+    renderPMList();
+  }
+
   function renderPMList() {
     const list = document.getElementById('pmList');
     if (pmCompanies.length === 0) {
-      list.innerHTML = '<li style="color:#c4a882;justify-content:center;">No companies added yet</li>';
+      list.innerHTML = '<li style="color:#c4a882;justify-content:center;border:none;background:none;">No companies added yet</li>';
       return;
     }
-    list.innerHTML = pmCompanies.map((c, i) => `
+    list.innerHTML = pmCompanies.map(c => `
       <li>
-        <span>${c}</span>
-        <button class="btn-danger" onclick="removeCompany(${i})">✕</button>
+        <span>${c.name}</span>
+        <button class="btn-row-danger" onclick="removeCompany('${c.id}', '${c.name.replace(/'/g,"\\'")}')">✕</button>
       </li>
     `).join('');
   }
 
-  function addCompany() {
+  async function addCompany() {
     const input = document.getElementById('newCompanyInput');
     const name  = input.value.trim();
     if (!name) return;
-    if (pmCompanies.includes(name)) { alert('That company is already in the list.'); return; }
-    pmCompanies.push(name);
+    if (pmCompanies.find(c => c.name.toLowerCase() === name.toLowerCase())) {
+      alert('That company is already in the list.'); return;
+    }
+    const { data, error } = await sb.from('pm_companies').insert({ name }).select().single();
+    if (error) { showMsg('pmSaveErr'); return; }
     input.value = '';
+    pmCompanies.push(data);
+    pmCompanies.sort((a, b) => a.name.localeCompare(b.name));
+    renderPMList();
+    showMsg('pmSaveOk');
+  }
+
+  async function removeCompany(id, name) {
+    if (!confirm(`Remove "${name}"?`)) return;
+    const { error } = await sb.from('pm_companies').delete().eq('id', id);
+    if (error) { showMsg('pmSaveErr'); return; }
+    pmCompanies = pmCompanies.filter(c => c.id !== id);
     renderPMList();
   }
 
-  function removeCompany(idx) {
-    pmCompanies.splice(idx, 1);
-    renderPMList();
-  }
-
-  function saveCompanies() {
-    localStorage.setItem('lor_pmCompanies', JSON.stringify(pmCompanies));
-    const confirm = document.getElementById('saveConfirm');
-    confirm.style.display = 'block';
-    setTimeout(() => confirm.style.display = 'none', 3000);
-  }
-
-  // ─── Password change ───────────────────────────────────────────────
+  // ── Password ────────────────────────────────────────────
   function changePassword() {
     const np = document.getElementById('newPwdInput').value;
     const cp = document.getElementById('confirmPwdInput').value;
-    const ok  = document.getElementById('pwdConfirm');
-    const err = document.getElementById('pwdError');
-    ok.style.display = err.style.display = 'none';
-
-    if (!np) { err.textContent = '⚠ Please enter a new password.'; err.style.display = 'block'; return; }
-    if (np !== cp) { err.textContent = '⚠ Passwords don\'t match.'; err.style.display = 'block'; return; }
-
+    document.getElementById('pwdOk').style.display  = 'none';
+    document.getElementById('pwdErr').style.display = 'none';
+    if (!np || np !== cp) { document.getElementById('pwdErr').style.display = 'block'; return; }
     localStorage.setItem('lor_adminPwd', np);
     document.getElementById('newPwdInput').value = '';
     document.getElementById('confirmPwdInput').value = '';
-    ok.style.display = 'block';
-    setTimeout(() => ok.style.display = 'none', 3000);
+    showMsg('pwdOk');
+  }
+
+  // ── Helpers ─────────────────────────────────────────────
+  function showMsg(id) {
+    const el = document.getElementById(id);
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 3000);
   }
 </script>
-
 </body>
 </html>
