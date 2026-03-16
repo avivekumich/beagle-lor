@@ -381,7 +381,7 @@
         You will receive instructions to enroll in billing on <strong>April 25, 2026</strong>.
       </div>
       <div class="error-msg" id="enrollError">Something went wrong saving your enrollment. Please contact us at arjun-vivek@beagleforpm.com.</div>
-      <a href="index.html" class="btn-home" onclick="resetForm()">← Return to Home</a>
+      <a href="index.html" class="btn-home" onclick="resetForm()">Enroll Another Unit? →</a>
     </div>
   </div>
 </div>
@@ -395,9 +395,15 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const DEFAULT_COMPANIES = [
-    "Acme Property Management","Sunrise Realty Group",
-    "Peak Property Solutions","BlueSky Lettings","Cornerstone Property Co."
+    { name: "Acme Property Management", admin_fee: 0 },
+    { name: "Sunrise Realty Group",     admin_fee: 0 },
+    { name: "Peak Property Solutions",  admin_fee: 0 },
+    { name: "BlueSky Lettings",         admin_fee: 0 },
+    { name: "Cornerstone Property Co.", admin_fee: 0 },
   ];
+
+  // Lookup map: company name → admin fee
+  let adminFeeMap = {};
 
   const matrix = {
     "750-1000":  { 3:17,  4:19,  5:21  },
@@ -412,18 +418,22 @@
   let selectedMonths = null;
   let currentQuote   = null;
 
-  // ── Load PM companies ──────────────────────────────────────
+  // ── Load PM companies + admin fees ────────────────────────
   async function loadPMCompanies() {
     const sel = document.getElementById('pmCompany');
     sel.innerHTML = '<option value="">— Select a company —</option>';
     let companies = DEFAULT_COMPANIES;
     try {
-      const { data, error } = await sb.from('pm_companies').select('name').order('name');
-      if (!error && data && data.length > 0) companies = data.map(r => r.name);
+      const { data, error } = await sb.from('pm_companies').select('name, admin_fee').order('name');
+      if (!error && data && data.length > 0) companies = data;
     } catch(e) {}
+
+    // Build fee lookup map (invisible to user)
+    adminFeeMap = {};
     companies.forEach(c => {
+      adminFeeMap[c.name] = c.admin_fee || 0;
       const opt = document.createElement('option');
-      opt.value = opt.textContent = c;
+      opt.value = opt.textContent = c.name;
       sel.appendChild(opt);
     });
   }
@@ -466,7 +476,8 @@
       return;
     }
 
-    const monthly   = matrix[band][selectedMonths];
+    const adminFee  = adminFeeMap[f.pm] || 0;
+    const monthly   = matrix[band][selectedMonths] + adminFee;
     const annual    = monthly * 12;
     const bandLabel = document.getElementById('rentBand').options[document.getElementById('rentBand').selectedIndex].text;
     const startLabel = document.getElementById('startDate').options[document.getElementById('startDate').selectedIndex].text;
@@ -510,7 +521,23 @@
   // ── Enroll ─────────────────────────────────────────────────
   async function enroll() {
     if (!currentQuote) return;
-    const q   = currentQuote;
+    const q = currentQuote;
+
+    // Validate required fields
+    const missing = [];
+    if (!q.name)       missing.push('Owner Name');
+    if (!q.addrLine1)  missing.push('Address Line 1');
+    if (!q.city)       missing.push('City');
+    if (!q.state)      missing.push('State');
+    if (!q.zip)        missing.push('Zip Code');
+    if (!q.pm)         missing.push('Property Management Company');
+    if (!q.phone && !q.email) missing.push('Phone Number or Email Address');
+
+    if (missing.length > 0) {
+      alert('Please fill in the following required fields before enrolling:\n\n• ' + missing.join('\n• '));
+      return;
+    }
+
     const btn = document.getElementById('enrollBtn');
     btn.disabled    = true;
     btn.textContent = 'Enrolling…';
@@ -558,7 +585,6 @@
       <div class="row"><span class="lbl">Plan</span><span class="val">${q.months}-Month Cover</span></div>
       <div class="row"><span class="lbl">Start Date</span><span class="val">${q.startLabel}</span></div>
       <div class="row"><span class="lbl">Monthly Fee</span><span class="val big">$${fmt(q.monthly)}/mo</span></div>
-      <div class="row"><span class="lbl">Annual Fee</span><span class="val big">$${fmt(q.annual)}/yr</span></div>
     `;
 
     document.getElementById('enrollOverlay').classList.add('visible');
