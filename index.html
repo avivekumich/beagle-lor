@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Beagle – Loss of Rent Cover</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,163 +19,101 @@
       padding: 24px;
     }
 
-    /* ── CARD ── */
     .card {
       background: #fff;
       border-radius: 16px;
-      box-shadow: 0 4px 32px rgba(120, 53, 15, 0.13);
+      box-shadow: 0 4px 32px rgba(120,53,15,0.13);
       max-width: 580px;
       width: 100%;
       overflow: hidden;
     }
 
-    /* ── HEADER ── */
     .card-header {
       background: linear-gradient(135deg, #7c2d12 0%, #c2410c 60%, #ea580c 100%);
       color: white;
       padding: 28px 32px 22px;
     }
 
-    .brand-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
+    .brand-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 
     .brand-logo {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       background: rgba(255,255,255,0.18);
       border: 2px solid rgba(255,255,255,0.35);
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 1.2rem;
     }
 
-    .brand-name {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: white;
-    }
-
-    .brand-tag {
-      font-size: 0.7rem;
-      font-weight: 600;
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.3);
-      padding: 2px 8px;
-      border-radius: 20px;
-      letter-spacing: 0.04em;
-      margin-left: 2px;
-    }
+    .brand-name { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+    .brand-tag  { font-size: 0.7rem; font-weight: 600; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em; margin-left: 2px; }
 
     .card-header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; }
     .card-header p  { font-size: 0.88rem; opacity: 0.82; }
 
-    /* ── BODY ── */
     .card-body { padding: 32px; }
 
-    .section-divider {
-      border: none;
-      border-top: 1px solid #fde8d0;
-      margin: 4px 0 24px;
-    }
+    .section-divider { border: none; border-top: 1px solid #fde8d0; margin: 4px 0 24px; }
 
     .section-title {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #c2410c;
-      margin-bottom: 16px;
-      padding-bottom: 6px;
-      border-bottom: 2px solid #fed7aa;
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #c2410c;
+      margin-bottom: 16px; padding-bottom: 6px; border-bottom: 2px solid #fed7aa;
     }
 
-    .field { margin-bottom: 20px; }
+    .field { margin-bottom: 16px; }
 
     .field label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #78350f;
-      margin-bottom: 8px;
+      display: block; font-size: 0.78rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: #78350f; margin-bottom: 7px;
     }
 
-    input[type="text"] {
-      width: 100%;
-      padding: 11px 14px;
-      border: 2px solid #fde8d0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      color: #1c1917;
-      background: #fffbf7;
-      transition: border-color 0.18s;
-      font-family: inherit;
-    }
+    .field-row { display: flex; gap: 12px; }
+    .field-row .field { flex: 1; }
 
-    input[type="text"]:focus { outline: none; border-color: #ea580c; background: #fff; }
-    input[type="text"]::placeholder { color: #c4a882; }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      width: 100%; padding: 11px 14px;
+      border: 2px solid #fde8d0; border-radius: 10px;
+      font-size: 0.93rem; color: #1c1917; background: #fffbf7;
+      transition: border-color 0.18s; font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus  { outline: none; border-color: #ea580c; background: #fff; }
+    input::placeholder        { color: #c4a882; }
 
     .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .pill {
-      flex: 1;
-      min-width: 80px;
-      padding: 10px 8px;
-      border: 2px solid #fde8d0;
-      border-radius: 10px;
-      background: #fffbf7;
-      color: #78350f;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.18s;
-      user-select: none;
+      flex: 1; min-width: 80px; padding: 10px 8px;
+      border: 2px solid #fde8d0; border-radius: 10px;
+      background: #fffbf7; color: #78350f;
+      font-size: 0.9rem; font-weight: 500; cursor: pointer;
+      text-align: center; transition: all 0.18s; user-select: none;
     }
-
     .pill:hover  { border-color: #ea580c; background: #fff7ed; color: #7c2d12; }
     .pill.active { border-color: #ea580c; background: #ea580c; color: white; font-weight: 600; }
 
     select {
-      width: 100%;
-      padding: 11px 14px;
-      border: 2px solid #fde8d0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      color: #1c1917;
-      background: #fffbf7;
+      width: 100%; padding: 11px 14px;
+      border: 2px solid #fde8d0; border-radius: 10px;
+      font-size: 0.93rem; color: #1c1917; background: #fffbf7;
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c2410c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      cursor: pointer;
-      transition: border-color 0.18s;
-      font-family: inherit;
+      background-repeat: no-repeat; background-position: right 14px center;
+      cursor: pointer; transition: border-color 0.18s; font-family: inherit;
     }
-
     select:focus { outline: none; border-color: #ea580c; background-color: #fff; }
 
-    /* ── QUOTE BOX ── */
+    /* Quote box */
     .quote-box {
-      background: #fff7ed;
-      border: 2px solid #fdba74;
-      border-radius: 14px;
-      padding: 24px 20px;
-      margin-top: 8px;
-      text-align: center;
-      display: none;
-      animation: fadeIn 0.3s ease;
+      background: #fff7ed; border: 2px solid #fdba74; border-radius: 14px;
+      padding: 24px 20px; margin-top: 8px; text-align: center;
+      display: none; animation: fadeIn 0.3s ease;
     }
-
     .quote-box.visible { display: block; }
 
     @keyframes fadeIn {
@@ -182,47 +121,17 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .quote-owner-name    { font-size: 0.85rem; color: #92400e; margin-bottom: 3px; font-weight: 500; }
-    .quote-owner-address { font-size: 0.8rem; color: #b45309; margin-bottom: 3px; }
-    .quote-owner-pm      { font-size: 0.78rem; color: #b45309; margin-bottom: 14px; }
+    .quote-owner-name    { font-size: 0.85rem; color: #92400e; margin-bottom: 3px; font-weight: 600; }
+    .quote-owner-detail  { font-size: 0.78rem; color: #b45309; margin-bottom: 3px; }
+    .quote-owner-spacer  { margin-bottom: 14px; }
 
-    .quote-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #c2410c;
-      margin-bottom: 4px;
-    }
-
+    .quote-label      { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #c2410c; margin-bottom: 4px; }
     .quote-plan-title { font-size: 1rem; font-weight: 600; color: #7c2d12; margin-bottom: 18px; }
 
-    .quote-amounts {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
+    .quote-amounts    { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
 
-    .amount-card {
-      flex: 1;
-      min-width: 130px;
-      background: white;
-      border-radius: 12px;
-      padding: 16px 12px;
-      box-shadow: 0 2px 8px rgba(120, 53, 15, 0.10);
-    }
-
-    .amount-card .type {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #b45309;
-      margin-bottom: 7px;
-    }
-
+    .amount-card       { flex: 1; min-width: 130px; background: white; border-radius: 12px; padding: 16px 12px; box-shadow: 0 2px 8px rgba(120,53,15,0.10); }
+    .amount-card .type { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #b45309; margin-bottom: 7px; }
     .amount-card .price { font-size: 1.9rem; font-weight: 800; color: #7c2d12; line-height: 1; }
     .amount-card .price sup { font-size: 1rem; font-weight: 600; vertical-align: super; }
     .amount-card .per  { font-size: 0.7rem; color: #b45309; margin-top: 4px; }
@@ -234,167 +143,102 @@
 
     .quote-note { font-size: 0.73rem; color: #92400e; margin-bottom: 16px; }
 
-    /* ── SUBMIT BUTTON ── */
-    .btn-submit {
-      display: block;
-      width: 100%;
-      padding: 14px;
+    .btn-enroll {
+      display: block; width: 100%; padding: 14px;
       background: linear-gradient(135deg, #7c2d12, #ea580c);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.02em;
-      transition: opacity 0.18s, transform 0.12s;
+      color: white; border: none; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      letter-spacing: 0.02em; transition: opacity 0.18s, transform 0.12s;
       font-family: inherit;
     }
+    .btn-enroll:hover    { opacity: 0.9; transform: translateY(-1px); }
+    .btn-enroll:active   { transform: translateY(0); }
+    .btn-enroll:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
-    .btn-submit:hover  { opacity: 0.9; transform: translateY(-1px); }
-    .btn-submit:active { transform: translateY(0); }
-
-    /* ── FOOTER ── */
     .card-footer {
-      text-align: center;
-      padding: 14px 32px 20px;
-      font-size: 0.75rem;
-      color: #c4a882;
-      border-top: 1px solid #fde8d0;
+      text-align: center; padding: 14px 32px 20px;
+      font-size: 0.75rem; color: #c4a882; border-top: 1px solid #fde8d0;
     }
-
     .card-footer strong { color: #b45309; }
 
-    .placeholder-msg {
-      text-align: center;
-      color: #c4a882;
-      font-size: 0.88rem;
-      padding: 20px 0 4px;
-    }
-
+    .placeholder-msg { text-align: center; color: #c4a882; font-size: 0.88rem; padding: 20px 0 4px; }
     .placeholder-msg span { font-size: 1.6rem; display: block; margin-bottom: 8px; }
 
-    /* ── CONFIRMATION OVERLAY ── */
+    /* ── ENROLLMENT SUCCESS OVERLAY ── */
     .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(124, 45, 18, 0.45);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(124,45,18,0.5); backdrop-filter: blur(5px);
+      z-index: 100; align-items: center; justify-content: center;
       padding: 24px;
-      animation: fadeIn 0.2s ease;
     }
+    .overlay.visible { display: flex; animation: fadeIn 0.2s ease; }
 
-    .overlay.visible { display: flex; }
-
-    .confirm-card {
-      background: white;
-      border-radius: 18px;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.22);
-      max-width: 440px;
-      width: 100%;
-      overflow: hidden;
-      animation: slideUp 0.25s ease;
+    .success-card {
+      background: white; border-radius: 20px;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.25);
+      max-width: 460px; width: 100%; overflow: hidden;
+      animation: slideUp 0.28s ease;
     }
 
     @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .confirm-header {
+    .success-header {
       background: linear-gradient(135deg, #7c2d12, #ea580c);
-      color: white;
-      padding: 22px 24px 18px;
+      color: white; padding: 28px 28px 22px; text-align: center;
+    }
+    .success-header .icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .success-header h2    { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .success-header p     { font-size: 0.88rem; opacity: 0.88; line-height: 1.5; }
+
+    .success-body { padding: 24px 28px 28px; }
+
+    .enrollment-summary {
+      background: #fff7ed; border: 1.5px solid #fed7aa;
+      border-radius: 12px; padding: 16px 18px; margin-bottom: 20px;
+    }
+
+    .enrollment-summary .row {
+      display: flex; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px dashed #fde8d0;
+      font-size: 0.85rem;
+    }
+    .enrollment-summary .row:last-child  { border-bottom: none; padding-bottom: 0; }
+    .enrollment-summary .row:first-child { padding-top: 0; }
+    .enrollment-summary .lbl  { color: #92400e; font-size: 0.78rem; font-weight: 600; }
+    .enrollment-summary .val  { color: #1c1917; font-weight: 500; text-align: right; }
+    .enrollment-summary .val.big { color: #7c2d12; font-weight: 800; font-size: 1rem; }
+
+    .billing-notice {
+      background: #f0fdf4; border: 1.5px solid #86efac;
+      border-radius: 10px; padding: 13px 16px; margin-bottom: 20px;
+      font-size: 0.83rem; color: #166534; line-height: 1.5;
       text-align: center;
     }
+    .billing-notice strong { display: block; margin-bottom: 3px; font-size: 0.88rem; }
 
-    .confirm-header .check { font-size: 2rem; margin-bottom: 8px; }
-    .confirm-header h2     { font-size: 1.15rem; font-weight: 700; margin-bottom: 4px; }
-    .confirm-header p      { font-size: 0.83rem; opacity: 0.85; }
-
-    .confirm-body { padding: 22px 24px; }
-
-    .confirm-summary {
-      background: #fff7ed;
-      border: 1.5px solid #fed7aa;
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 18px;
-      font-size: 0.85rem;
-      color: #1c1917;
+    .btn-home {
+      display: block; width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #7c2d12, #ea580c);
+      color: white; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      text-align: center; text-decoration: none;
+      font-family: inherit; transition: opacity 0.18s;
     }
+    .btn-home:hover { opacity: 0.88; }
 
-    .confirm-summary .row {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      border-bottom: 1px dashed #fde8d0;
+    .error-msg {
+      background: #fff1f1; border: 1.5px solid #fca5a5;
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+      font-size: 0.83rem; color: #dc2626; text-align: center;
+      display: none;
     }
-
-    .confirm-summary .row:last-child { border-bottom: none; padding-bottom: 0; }
-    .confirm-summary .row:first-child { padding-top: 0; }
-    .confirm-summary .lbl { color: #92400e; font-size: 0.78rem; font-weight: 600; }
-    .confirm-summary .val { color: #1c1917; font-weight: 500; text-align: right; }
-    .confirm-summary .val.price { color: #7c2d12; font-weight: 800; font-size: 0.95rem; }
-
-    .stripe-trust {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: #9ca3af;
-      margin-bottom: 14px;
-    }
-
-    .stripe-trust .lock { color: #635bff; font-size: 0.85rem; }
-    .stripe-trust strong { color: #635bff; }
-
-    .btn-pay {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      background: #635bff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 0.02em;
-      transition: opacity 0.18s, transform 0.12s;
-      font-family: inherit;
-      margin-bottom: 10px;
-    }
-
-    .btn-pay:hover  { opacity: 0.9; transform: translateY(-1px); }
-    .btn-pay:active { transform: translateY(0); }
-
-    .btn-back {
-      display: block;
-      width: 100%;
-      padding: 11px;
-      background: transparent;
-      border: 2px solid #fde8d0;
-      color: #b45309;
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-
-    .btn-back:hover { background: #fff7ed; }
   </style>
 </head>
 <body>
 
-<!-- ══════════ MAIN QUOTE CARD ══════════ -->
 <div class="card">
   <div class="card-header">
     <div class="brand-row">
@@ -403,21 +247,58 @@
       <span class="brand-tag">for Property Managers</span>
     </div>
     <h1>Loss of Rent Cover</h1>
-    <p>Get an instant quote and enroll in minutes</p>
+    <p>Get an instant quote and enrol in minutes</p>
   </div>
 
   <div class="card-body">
 
+    <!-- OWNER DETAILS -->
     <div class="section-title">Owner Details</div>
 
-    <div class="field">
-      <label>Owner Name</label>
-      <input type="text" id="ownerName" placeholder="e.g. Jane Smith" oninput="updateQuote()" />
+    <div class="field-row">
+      <div class="field">
+        <label>First &amp; Last Name</label>
+        <input type="text" id="ownerName" placeholder="e.g. Jane Smith" oninput="updateQuote()" />
+      </div>
     </div>
 
+    <div class="field-row">
+      <div class="field">
+        <label>Phone Number</label>
+        <input type="tel" id="ownerPhone" placeholder="e.g. (512) 555-0100" oninput="updateQuote()" />
+      </div>
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="ownerEmail" placeholder="e.g. jane@email.com" oninput="updateQuote()" />
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+    <!-- PROPERTY ADDRESS -->
+    <div class="section-title">Property Address</div>
+
     <div class="field">
-      <label>Property Address</label>
-      <input type="text" id="ownerAddress" placeholder="e.g. 42 Maple Street, Austin, TX 78701" oninput="updateQuote()" />
+      <label>Address Line 1</label>
+      <input type="text" id="addrLine1" placeholder="Street number and name" oninput="updateQuote()" />
+    </div>
+    <div class="field">
+      <label>Address Line 2 <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <input type="text" id="addrLine2" placeholder="Apt, Suite, Unit, etc." oninput="updateQuote()" />
+    </div>
+    <div class="field-row">
+      <div class="field" style="flex:2;">
+        <label>City</label>
+        <input type="text" id="addrCity" placeholder="City" oninput="updateQuote()" />
+      </div>
+      <div class="field" style="flex:1;">
+        <label>State</label>
+        <input type="text" id="addrState" placeholder="TX" maxlength="2" oninput="this.value=this.value.toUpperCase();updateQuote()" />
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Zip Code</label>
+        <input type="text" id="addrZip" placeholder="78701" maxlength="10" oninput="updateQuote()" />
+      </div>
     </div>
 
     <div class="field">
@@ -429,6 +310,7 @@
 
     <hr class="section-divider" />
 
+    <!-- COVER DETAILS -->
     <div class="section-title">Cover Details</div>
 
     <div class="field">
@@ -454,83 +336,98 @@
       </select>
     </div>
 
-    <!-- Quote Output -->
-    <div id="quoteBox" class="quote-box"><!-- filled by JS --></div>
+    <div class="field">
+      <label>Coverage Start Date</label>
+      <select id="startDate" onchange="updateQuote()">
+        <option value="">— Select a start date —</option>
+        <option value="5/1/2026">May 1, 2026</option>
+        <option value="6/1/2026">June 1, 2026</option>
+        <option value="7/1/2026">July 1, 2026</option>
+        <option value="8/1/2026">August 1, 2026</option>
+        <option value="9/1/2026">September 1, 2026</option>
+        <option value="10/1/2026">October 1, 2026</option>
+        <option value="11/1/2026">November 1, 2026</option>
+        <option value="12/1/2026">December 1, 2026</option>
+      </select>
+    </div>
+
+    <!-- Quote output -->
+    <div id="quoteBox" class="quote-box"></div>
 
     <div id="placeholderMsg" class="placeholder-msg">
       <span>🏠</span>
-      Select a cover period and rent band above to see your Beagle quote
+      Select a cover period, rent band, and start date to see your Beagle quote
     </div>
 
   </div>
 
   <div class="card-footer">
-    A <strong>Beagle</strong> product &nbsp;·&nbsp; Secure payments powered by Stripe &nbsp;·&nbsp; beagleforpm.com
+    A <strong>Beagle</strong> product &nbsp;·&nbsp; beagleforpm.com
   </div>
 </div>
 
-<!-- ══════════ CONFIRMATION OVERLAY ══════════ -->
-<div class="overlay" id="confirmOverlay">
-  <div class="confirm-card">
-    <div class="confirm-header">
-      <div class="check">✅</div>
-      <h2>Review Your Quote</h2>
-      <p>Please confirm your details before proceeding to payment</p>
+<!-- ENROLLMENT SUCCESS OVERLAY -->
+<div class="overlay" id="enrollOverlay">
+  <div class="success-card">
+    <div class="success-header">
+      <div class="icon">🎉</div>
+      <h2>You're Enrolled!</h2>
+      <p id="enrollHeadline"></p>
     </div>
-    <div class="confirm-body">
-      <div class="confirm-summary" id="confirmSummary"><!-- filled by JS --></div>
-      <div class="stripe-trust">
-        <span class="lock">🔒</span>
-        Secure payment processed by <strong>Stripe</strong>
+    <div class="success-body">
+      <div class="enrollment-summary" id="enrollSummary"></div>
+      <div class="billing-notice">
+        <strong>📅 Billing Setup Instructions</strong>
+        You will receive instructions to enroll in billing on <strong>April 25, 2026</strong>.
       </div>
-      <button class="btn-pay" onclick="proceedToPayment()">Proceed to Secure Payment →</button>
-      <button class="btn-back" onclick="closeConfirm()">← Go back and edit</button>
+      <div class="error-msg" id="enrollError">Something went wrong saving your enrollment. Please contact us at arjun-vivek@beagleforpm.com.</div>
+      <a href="index.html" class="btn-home" onclick="resetForm()">← Return to Home</a>
     </div>
   </div>
 </div>
 
 <script>
-  // ─── STRIPE PAYMENT LINK (replace with your actual Stripe link) ───
-  const STRIPE_URL = 'https://stripe.com';
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const SUPABASE_URL      = 'https://rucodbompawcsfeqdlog.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1Y29kYm9tcGF3Y3NmZXFkbG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Nzk4NTMsImV4cCI6MjA4OTI1NTg1M30.pb0oaGqYFpzs2KGbnIYaWqOsIyU2z8iUWnNdWExDxDc';
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  // ─── Pricing matrix ───────────────────────────────────────────────
-  const matrix = {
-    "750-1000":  { 3: 17,  4: 19,  5: 21  },
-    "1001-2000": { 3: 29,  4: 32,  5: 35  },
-    "2001-3000": { 3: 48,  4: 54,  5: 59  },
-    "3001-4000": { 3: 67,  4: 75,  5: 82  },
-    "4001-5000": { 3: 86,  4: 97,  5: 106 },
-    "5001-6000": { 3: 105, 4: 118, 5: 129 },
-    "6001-7000": { 3: 124, 4: 140, 5: 153 },
-  };
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // ─── Default PM companies ──────────────────────────────────────────
   const DEFAULT_COMPANIES = [
-    "Acme Property Management",
-    "Sunrise Realty Group",
-    "Peak Property Solutions",
-    "BlueSky Lettings",
-    "Cornerstone Property Co."
+    "Acme Property Management","Sunrise Realty Group",
+    "Peak Property Solutions","BlueSky Lettings","Cornerstone Property Co."
   ];
+
+  const matrix = {
+    "750-1000":  { 3:17,  4:19,  5:21  },
+    "1001-2000": { 3:29,  4:32,  5:35  },
+    "2001-3000": { 3:48,  4:54,  5:59  },
+    "3001-4000": { 3:67,  4:75,  5:82  },
+    "4001-5000": { 3:86,  4:97,  5:106 },
+    "5001-6000": { 3:105, 4:118, 5:129 },
+    "6001-7000": { 3:124, 4:140, 5:153 },
+  };
 
   let selectedMonths = null;
   let currentQuote   = null;
 
-  // ─── Load PM companies ─────────────────────────────────────────────
-  function loadPMCompanies() {
-    const stored    = localStorage.getItem('lor_pmCompanies');
-    const companies = stored ? JSON.parse(stored) : DEFAULT_COMPANIES;
-    const sel       = document.getElementById('pmCompany');
-    sel.innerHTML   = '<option value="">— Select a company —</option>';
+  // ── Load PM companies ──────────────────────────────────────
+  async function loadPMCompanies() {
+    const sel = document.getElementById('pmCompany');
+    sel.innerHTML = '<option value="">— Select a company —</option>';
+    let companies = DEFAULT_COMPANIES;
+    try {
+      const { data, error } = await sb.from('pm_companies').select('name').order('name');
+      if (!error && data && data.length > 0) companies = data.map(r => r.name);
+    } catch(e) {}
     companies.forEach(c => {
-      const opt     = document.createElement('option');
-      opt.value     = c;
-      opt.textContent = c;
+      const opt = document.createElement('option');
+      opt.value = opt.textContent = c;
       sel.appendChild(opt);
     });
   }
 
-  // ─── Plan pill selection ───────────────────────────────────────────
   function selectPlan(el) {
     document.querySelectorAll('#planGroup .pill').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
@@ -540,16 +437,29 @@
 
   function fmt(n) { return n.toLocaleString('en-US'); }
 
-  // ─── Build & show quote ────────────────────────────────────────────
+  function getFields() {
+    return {
+      name:      document.getElementById('ownerName').value.trim(),
+      phone:     document.getElementById('ownerPhone').value.trim(),
+      email:     document.getElementById('ownerEmail').value.trim(),
+      addrLine1: document.getElementById('addrLine1').value.trim(),
+      addrLine2: document.getElementById('addrLine2').value.trim(),
+      city:      document.getElementById('addrCity').value.trim(),
+      state:     document.getElementById('addrState').value.trim(),
+      zip:       document.getElementById('addrZip').value.trim(),
+      pm:        document.getElementById('pmCompany').value,
+      startDate: document.getElementById('startDate').value,
+    };
+  }
+
+  // ── Update quote display ───────────────────────────────────
   function updateQuote() {
     const band        = document.getElementById('rentBand').value;
     const quoteBox    = document.getElementById('quoteBox');
     const placeholder = document.getElementById('placeholderMsg');
-    const name        = document.getElementById('ownerName').value.trim();
-    const address     = document.getElementById('ownerAddress').value.trim();
-    const pm          = document.getElementById('pmCompany').value;
+    const f           = getFields();
 
-    if (!selectedMonths || !band) {
+    if (!selectedMonths || !band || !f.startDate) {
       quoteBox.classList.remove('visible');
       placeholder.style.display = '';
       currentQuote = null;
@@ -558,18 +468,23 @@
 
     const monthly   = matrix[band][selectedMonths];
     const annual    = monthly * 12;
-    const bandLabel = document.getElementById('rentBand').options[
-      document.getElementById('rentBand').selectedIndex
-    ].text;
+    const bandLabel = document.getElementById('rentBand').options[document.getElementById('rentBand').selectedIndex].text;
+    const startLabel = document.getElementById('startDate').options[document.getElementById('startDate').selectedIndex].text;
 
-    currentQuote = { name, address, pm, months: selectedMonths, band, bandLabel, monthly, annual };
+    currentQuote = { ...f, months: selectedMonths, band, bandLabel, monthly, annual, startLabel };
 
-    const ownerLine   = name    ? `<div class="quote-owner-name">👤 ${name}</div>` : '';
-    const addressLine = address ? `<div class="quote-owner-address">📍 ${address}</div>` : '';
-    const pmLine      = pm      ? `<div class="quote-owner-pm">🏢 Managed by ${pm}</div>` : '';
+    // Build address display
+    const addrParts = [f.addrLine1, f.addrLine2, f.city && f.state ? `${f.city}, ${f.state}` : (f.city || f.state), f.zip].filter(Boolean);
+
+    const nameLine  = f.name      ? `<div class="quote-owner-name">👤 ${f.name}</div>` : '';
+    const phoneLine = f.phone     ? `<div class="quote-owner-detail">📞 ${f.phone}</div>` : '';
+    const emailLine = f.email     ? `<div class="quote-owner-detail">✉️ ${f.email}</div>` : '';
+    const addrLine  = addrParts.length ? `<div class="quote-owner-detail">📍 ${addrParts.join(' · ')}</div>` : '';
+    const pmLine    = f.pm        ? `<div class="quote-owner-detail">🏢 ${f.pm}</div>` : '';
+    const hasOwner  = nameLine || phoneLine || emailLine || addrLine || pmLine;
 
     quoteBox.innerHTML = `
-      ${ownerLine}${addressLine}${pmLine}
+      ${hasOwner ? `${nameLine}${phoneLine}${emailLine}${addrLine}${pmLine}<div class="quote-owner-spacer"></div>` : ''}
       <div class="quote-label">Your Beagle Quote</div>
       <div class="quote-plan-title">${selectedMonths}-Month Cover &nbsp;·&nbsp; ${bandLabel}</div>
       <div class="quote-amounts">
@@ -584,83 +499,77 @@
           <div class="per">per year (12 × $${fmt(monthly)})</div>
         </div>
       </div>
-      <div class="quote-note">Beagle Loss of Rent Cover — owner cost based on plan and rent band.</div>
-      <button class="btn-submit" onclick="openConfirm()">Submit Quote &amp; Pay →</button>
+      <div class="quote-note">Coverage starts ${startLabel} &nbsp;·&nbsp; Beagle Loss of Rent Cover</div>
+      <button class="btn-enroll" id="enrollBtn" onclick="enroll()">Enroll in Coverage →</button>
     `;
 
     quoteBox.classList.add('visible');
     placeholder.style.display = 'none';
   }
 
-  // ─── Confirmation overlay ──────────────────────────────────────────
-  function openConfirm() {
+  // ── Enroll ─────────────────────────────────────────────────
+  async function enroll() {
     if (!currentQuote) return;
-    const q = currentQuote;
+    const q   = currentQuote;
+    const btn = document.getElementById('enrollBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Enrolling…';
 
-    document.getElementById('confirmSummary').innerHTML = `
-      ${q.name    ? `<div class="row"><span class="lbl">Owner</span><span class="val">${q.name}</span></div>` : ''}
-      ${q.address ? `<div class="row"><span class="lbl">Property</span><span class="val">${q.address}</span></div>` : ''}
-      ${q.pm      ? `<div class="row"><span class="lbl">Managed by</span><span class="val">${q.pm}</span></div>` : ''}
-      <div class="row"><span class="lbl">Cover Period</span><span class="val">${q.months}-Month Plan</span></div>
-      <div class="row"><span class="lbl">Rent Band</span><span class="val">${q.bandLabel}</span></div>
-      <div class="row"><span class="lbl">Monthly Cost</span><span class="val price">$${fmt(q.monthly)}/mo</span></div>
-      <div class="row"><span class="lbl">Annual Cost</span><span class="val price">$${fmt(q.annual)}/yr</span></div>
+    // Save to Supabase
+    try {
+      const { error } = await sb.from('enrollments').insert({
+        name:         q.name      || null,
+        phone:        q.phone     || null,
+        email:        q.email     || null,
+        address_line1: q.addrLine1 || null,
+        address_line2: q.addrLine2 || null,
+        city:         q.city      || null,
+        state:        q.state     || null,
+        zip:          q.zip       || null,
+        pm_company:   q.pm        || null,
+        months:       q.months,
+        band:         q.band,
+        band_label:   q.bandLabel,
+        monthly_cost: q.monthly,
+        annual_cost:  q.annual,
+        start_date:   q.startDate || null,
+      });
+      if (error) throw error;
+    } catch(e) {
+      console.error(e);
+      document.getElementById('enrollError').style.display = 'block';
+      btn.disabled    = false;
+      btn.textContent = 'Enroll in Coverage →';
+      // Still show overlay so they know we tried
+    }
+
+    // Build overlay content
+    document.getElementById('enrollHeadline').textContent =
+      `You are enrolled in Loss of Rent Coverage at a monthly fee of $${fmt(q.monthly)}, starting ${q.startLabel}.`;
+
+    const addrFull = [q.addrLine1, q.addrLine2, q.city && q.state ? `${q.city}, ${q.state} ${q.zip}` : q.zip].filter(Boolean).join(', ');
+
+    document.getElementById('enrollSummary').innerHTML = `
+      ${q.name      ? `<div class="row"><span class="lbl">Name</span><span class="val">${q.name}</span></div>` : ''}
+      ${q.phone     ? `<div class="row"><span class="lbl">Phone</span><span class="val">${q.phone}</span></div>` : ''}
+      ${q.email     ? `<div class="row"><span class="lbl">Email</span><span class="val">${q.email}</span></div>` : ''}
+      ${addrFull    ? `<div class="row"><span class="lbl">Property</span><span class="val">${addrFull}</span></div>` : ''}
+      ${q.pm        ? `<div class="row"><span class="lbl">Managed by</span><span class="val">${q.pm}</span></div>` : ''}
+      <div class="row"><span class="lbl">Plan</span><span class="val">${q.months}-Month Cover</span></div>
+      <div class="row"><span class="lbl">Start Date</span><span class="val">${q.startLabel}</span></div>
+      <div class="row"><span class="lbl">Monthly Fee</span><span class="val big">$${fmt(q.monthly)}/mo</span></div>
+      <div class="row"><span class="lbl">Annual Fee</span><span class="val big">$${fmt(q.annual)}/yr</span></div>
     `;
 
-    document.getElementById('confirmOverlay').classList.add('visible');
+    document.getElementById('enrollOverlay').classList.add('visible');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeConfirm() {
-    document.getElementById('confirmOverlay').classList.remove('visible');
+  function resetForm() {
+    document.getElementById('enrollOverlay').classList.remove('visible');
     document.body.style.overflow = '';
   }
 
-  // Close overlay on backdrop click
-  document.getElementById('confirmOverlay').addEventListener('click', function(e) {
-    if (e.target === this) closeConfirm();
-  });
-
-  // ─── Proceed to payment ────────────────────────────────────────────
-  function proceedToPayment() {
-    if (!currentQuote) return;
-    const q   = currentQuote;
-    const now = new Date().toLocaleString('en-US');
-
-    // Save enrollment to localStorage for admin
-    const stored      = localStorage.getItem('lor_enrollments');
-    const enrollments = stored ? JSON.parse(stored) : [];
-    enrollments.push({ ...q, submittedAt: now });
-    localStorage.setItem('lor_enrollments', JSON.stringify(enrollments));
-
-    // Send notification email to admin
-    const subject = encodeURIComponent(`Beagle LOR Enrollment – ${q.name || 'New Submission'}`);
-    const body    = encodeURIComponent(
-`Beagle Loss of Rent — New Enrollment
-======================================
-Date:      ${now}
-Name:      ${q.name    || '—'}
-Address:   ${q.address || '—'}
-PM Co.:    ${q.pm      || '—'}
-
-Plan:      ${q.months}-Month Cover
-Rent Band: ${q.bandLabel}
-Monthly:   $${q.monthly}
-Annual:    $${q.annual}
-`);
-
-    // Open mailto (doesn't block Stripe redirect)
-    const mailLink = document.createElement('a');
-    mailLink.href  = `mailto:arjun-vivek@beagleforpm.com?subject=${subject}&body=${body}`;
-    mailLink.click();
-
-    // Redirect to Stripe in same tab
-    setTimeout(() => {
-      window.location.href = STRIPE_URL;
-    }, 300);
-  }
-
-  // ─── Init ──────────────────────────────────────────────────────────
   loadPMCompanies();
 </script>
 
