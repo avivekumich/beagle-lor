@@ -96,14 +96,19 @@
     .pm-box { background: white; border: 1.5px solid #fde8d0; border-radius: 12px; padding: 22px; }
     .pm-box h3 { font-size: 0.85rem; font-weight: 700; color: #7c2d12; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #fde8d0; }
 
-    .pm-list { list-style: none; margin-bottom: 16px; max-height: 320px; overflow-y: auto; }
-    .pm-list li { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: #fffbf7; border: 1.5px solid #fde8d0; border-radius: 8px; margin-bottom: 7px; font-size: 0.88rem; color: #1c1917; }
-    .pm-list li span { flex: 1; }
+    .pm-list { list-style: none; margin-bottom: 16px; max-height: 360px; overflow-y: auto; }
+    .pm-list li { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #fffbf7; border: 1.5px solid #fde8d0; border-radius: 8px; margin-bottom: 7px; font-size: 0.88rem; color: #1c1917; }
+    .pm-list li .pm-name { flex: 1; font-weight: 500; }
+    .pm-list li .fee-badge { background: #fff7ed; border: 1px solid #fed7aa; color: #c2410c; font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; white-space: nowrap; }
+    .pm-list li .btn-edit-fee { padding: 4px 10px; background: #fff7ed; border: 1px solid #fdba74; color: #c2410c; border-radius: 6px; font-size: 0.72rem; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .pm-list li .btn-edit-fee:hover { background: #fde8d0; }
 
-    .add-pm-row { display: flex; gap: 8px; }
-    .add-pm-row input { flex: 1; padding: 10px 12px; border: 2px solid #fde8d0; border-radius: 9px; font-size: 0.88rem; font-family: inherit; color: #1c1917; background: #fffbf7; }
+    .add-pm-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .add-pm-row input.name-input { flex: 2; min-width: 140px; padding: 10px 12px; border: 2px solid #fde8d0; border-radius: 9px; font-size: 0.88rem; font-family: inherit; color: #1c1917; background: #fffbf7; }
+    .add-pm-row input.fee-input  { flex: 0 0 90px; padding: 10px 12px; border: 2px solid #fde8d0; border-radius: 9px; font-size: 0.88rem; font-family: inherit; color: #1c1917; background: #fffbf7; }
     .add-pm-row input:focus { outline: none; border-color: #ea580c; }
     .add-pm-row input::placeholder { color: #c4a882; }
+    .add-pm-row .fee-label { font-size: 0.72rem; color: #b45309; font-weight: 600; align-self: center; white-space: nowrap; }
 
     .btn-add { padding: 10px 16px; background: #ea580c; color: white; border: none; border-radius: 9px; font-weight: 700; font-size: 0.88rem; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
     .btn-add:hover { opacity: 0.88; }
@@ -192,10 +197,11 @@
       <div class="pm-grid">
         <div class="pm-box">
           <h3>Current Companies</h3>
-          <ul class="pm-list" id="pmList"><li style="color:#c4a882;justify-content:center;">Loading…</li></ul>
+          <ul class="pm-list" id="pmList"><li style="color:#c4a882;justify-content:center;border:none;background:none;">Loading…</li></ul>
           <div class="add-pm-row">
-            <input type="text" id="newCompanyInput" placeholder="Add new company…"
-                   onkeydown="if(event.key==='Enter') addCompany()" />
+            <input type="text"   class="name-input" id="newCompanyInput" placeholder="Company name…" />
+            <span class="fee-label">+$</span>
+            <input type="number" class="fee-input"  id="newFeeInput" placeholder="0" min="0" step="1" />
             <button class="btn-add" onclick="addCompany()">+ Add</button>
           </div>
           <div class="save-confirm" id="pmSaveOk">✅ Saved!</div>
@@ -365,7 +371,7 @@
 
   // ── PM Companies ────────────────────────────────────────
   async function loadPMCompanies() {
-    const { data, error } = await sb.from('pm_companies').select('id, name').order('name');
+    const { data, error } = await sb.from('pm_companies').select('id, name, admin_fee').order('name');
     pmCompanies = (!error && data) ? data : [];
     renderPMList();
   }
@@ -376,26 +382,45 @@
       list.innerHTML = '<li style="color:#c4a882;justify-content:center;border:none;background:none;">No companies added yet</li>';
       return;
     }
-    list.innerHTML = pmCompanies.map(c => `
-      <li>
-        <span>${c.name}</span>
-        <button class="btn-row-danger" onclick="removeCompany('${c.id}', '${c.name.replace(/'/g,"\\'")}')">✕</button>
-      </li>
-    `).join('');
+    list.innerHTML = pmCompanies.map(c => {
+      const fee = c.admin_fee || 0;
+      return `
+        <li>
+          <span class="pm-name">${c.name}</span>
+          <span class="fee-badge">+$${fee} fee</span>
+          <button class="btn-edit-fee" onclick="editFee('${c.id}', '${c.name.replace(/'/g,"\\'")}', ${fee})">Edit Fee</button>
+          <button class="btn-row-danger" onclick="removeCompany('${c.id}', '${c.name.replace(/'/g,"\\'")}')">✕</button>
+        </li>`;
+    }).join('');
   }
 
   async function addCompany() {
-    const input = document.getElementById('newCompanyInput');
-    const name  = input.value.trim();
+    const nameInput = document.getElementById('newCompanyInput');
+    const feeInput  = document.getElementById('newFeeInput');
+    const name      = nameInput.value.trim();
+    const admin_fee = parseInt(feeInput.value) || 0;
     if (!name) return;
     if (pmCompanies.find(c => c.name.toLowerCase() === name.toLowerCase())) {
       alert('That company is already in the list.'); return;
     }
-    const { data, error } = await sb.from('pm_companies').insert({ name }).select().single();
+    const { data, error } = await sb.from('pm_companies').insert({ name, admin_fee }).select().single();
     if (error) { showMsg('pmSaveErr'); return; }
-    input.value = '';
+    nameInput.value = '';
+    feeInput.value  = '';
     pmCompanies.push(data);
     pmCompanies.sort((a, b) => a.name.localeCompare(b.name));
+    renderPMList();
+    showMsg('pmSaveOk');
+  }
+
+  async function editFee(id, name, currentFee) {
+    const input = prompt(`Admin fee for "${name}" (current: $${currentFee})\nEnter new fee amount:`, currentFee);
+    if (input === null) return;
+    const admin_fee = parseInt(input) || 0;
+    const { error } = await sb.from('pm_companies').update({ admin_fee }).eq('id', id);
+    if (error) { showMsg('pmSaveErr'); return; }
+    const co = pmCompanies.find(c => c.id === id);
+    if (co) co.admin_fee = admin_fee;
     renderPMList();
     showMsg('pmSaveOk');
   }
